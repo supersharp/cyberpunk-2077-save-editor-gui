@@ -11,7 +11,7 @@
     <RootNamespace>CP2077SaveEditor.Wpf</RootNamespace>
     <AssemblyName>CP2077SaveEditor.Wpf</AssemblyName>
     <ApplicationIcon>..\CP2077SaveEditor\icon.ico</ApplicationIcon>
-    <Version>1.1.2</Version>
+    <Version>1.1.3</Version>
   </PropertyGroup>
 
   <!-- Release: dotnet publish -c Release -r win-x64 -->
