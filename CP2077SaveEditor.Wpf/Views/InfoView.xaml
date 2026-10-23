@@ -24,10 +24,10 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <Button Content="VIEW ON GITHUB" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"
                             Command="{Binding OpenLinkCommand}" CommandParameter="{Binding RepositoryUrl}"
-                            ToolTip="Open the repository on GitHub" />
-                    <Button Content="FORK (SUPERSHARP)"
-                            Command="{Binding OpenLinkCommand}" CommandParameter="{Binding ForkedRepositoryUrl}"
-                            ToolTip="Open the supersharp fork on GitHub" />
+                            ToolTip="Open the repository (supersharp) on GitHub" />
+                    <Button Content="VIEW UPSTREAM"
+                            Command="{Binding OpenLinkCommand}" CommandParameter="{Binding UpstreamRepositoryUrl}"
+                            ToolTip="Open upstream (AtfastrSlushyMaker) on GitHub" />
                 </StackPanel>
             </Grid>
 
@@ -36,7 +36,7 @@
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
                         <Button Content="CHECK FOR UPDATES" Command="{Binding CheckForUpdatesCommand}" Margin="0,0,8,0"
-                                ToolTip="Check GitHub for new releases" />
+                                ToolTip="Check supersharp/cyberpunk-2077-save-editor-gui for new releases" />
                         <Button Content="DOWNLOAD LATEST" Style="{StaticResource PrimaryButton}"
                                 Command="{Binding OpenReleasesCommand}"
                                 ToolTip="Open the latest release on GitHub in your browser" />
@@ -49,7 +49,7 @@
             </ContentControl>
 
             <!-- Credits -->
-            <TextBlock Text="BUILT ON &amp; FORKED FROM" Style="{StaticResource Label}" Foreground="{StaticResource AccentBrush}" FontSize="12" Margin="0,0,0,10" />
+            <TextBlock Text="BUILT ON &amp; UPSTREAM PROJECTS" Style="{StaticResource Label}" Foreground="{StaticResource AccentBrush}" FontSize="12" Margin="0,0,0,10" />
             <ItemsControl ItemsSource="{Binding Credits}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

@@ -48,7 +48,7 @@ interface with real item names and icons.
 
 ## Download and use
 
-1. Download **CP2077SaveEditor.exe** from the [latest release](https://github.com/AtfastrSlushyMaker/cyberpunk-2077-save-editor-gui/releases/latest).
+1. Download **CP2077SaveEditor.exe** from the [latest release](https://github.com/supersharp/cyberpunk-2077-save-editor-gui/releases/latest).
    It is a single file: no install, no .NET runtime, put it anywhere.
 2. Run it, pick a save, make changes, then press **Save changes** (or Ctrl+S).
 3. To update, use **Download latest version** on the Info page, close the editor, and replace the old exe with the new download.
@@ -84,7 +84,7 @@ Patch 2.5 changed how the game stores stats and some world data. The updates
 Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (x64) and Git on Windows.
 
 ```powershell
-git clone --recurse-submodules https://github.com/AtfastrSlushyMaker/cyberpunk-2077-save-editor-gui.git
+git clone --recurse-submodules https://github.com/supersharp/cyberpunk-2077-save-editor-gui.git
 cd cyberpunk-2077-save-editor-gui
 ./tools/setup.ps1                       # initializes the WolvenKit submodule
 dotnet build CP2077SaveEditor.Wpf -c Release
@@ -107,10 +107,10 @@ Build the projects one at a time; the upstream `ResourceGenerator` project in th
 
 ## Credits
 
-- **[CP2077 Save Editor Fork](https://github.com/supersharp/cyberpunk-2077-save-editor-gui) by supersharp**:
+- **[CP2077 Save Editor](https://github.com/supersharp/cyberpunk-2077-save-editor-gui) by supersharp**:
   Intelligent fuzzy search across all views and editors, .NET 10 x64 modernization, multi-branch WolvenKit
   release workflows, and clean WolvenKit update_2.5 integration.
-- **[CP2077 Save Editor](https://github.com/AtfastrSlushyMaker/cyberpunk-2077-save-editor-gui) by AtfastrSlushyMaker**:
+- **[CP2077 Save Editor (Upstream)](https://github.com/AtfastrSlushyMaker/cyberpunk-2077-save-editor-gui) by AtfastrSlushyMaker**:
   The modern WPF rebuild with patch 2.5 save support, lossless writing, catalog indexing, vehicle pictures, and save library.
 
 - **[CyberCAT-SimpleGUI](https://github.com/Deweh/CyberCAT-SimpleGUI) by Deweh**: the original editor this

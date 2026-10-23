@@ -11,17 +11,17 @@ namespace CP2077SaveEditor.Wpf.Services;
 public sealed record UpdateInfo(Version Version, string Tag, string PageUrl, string? DownloadUrl, string Notes);
 
 /// <summary>
-/// Checks GitHub releases for new builds and provides release download links.
+/// Checks the GitHub repository (supersharp/cyberpunk-2077-save-editor-gui) for releases and new builds.
 /// </summary>
 public static class UpdateService
 {
-    public const string Repository = "AtfastrSlushyMaker/cyberpunk-2077-save-editor-gui";
-    public const string ForkedRepository = "supersharp/cyberpunk-2077-save-editor-gui";
+    public const string Repository = "supersharp/cyberpunk-2077-save-editor-gui";
+    public const string UpstreamRepository = "AtfastrSlushyMaker/cyberpunk-2077-save-editor-gui";
 
     public static string RepositoryUrl => $"https://github.com/{Repository}";
     public static string ReleasesUrl => $"{RepositoryUrl}/releases";
     public static string LatestReleaseUrl => $"{ReleasesUrl}/latest";
-    public static string ForkedRepositoryUrl => $"https://github.com/{ForkedRepository}";
+    public static string UpstreamRepositoryUrl => $"https://github.com/{UpstreamRepository}";
 
     public static Version CurrentVersion { get; } = typeof(UpdateService).Assembly.GetName().Version ?? new Version(1, 1, 1);
 
@@ -41,7 +41,7 @@ public static class UpdateService
         using var response = await s_http.GetAsync($"https://api.github.com/repos/{Repository}/releases/latest");
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
-            return null;
+            return null; // No releases published on repository yet
         }
         response.EnsureSuccessStatusCode();
         using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
@@ -58,7 +58,7 @@ public static class UpdateService
                 .FirstOrDefault(a => a.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) || a.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)).Url
             : null;
 
-        return new UpdateInfo(version, tag, root.GetProperty("html_url").GetString() ?? LatestReleaseUrl, downloadUrl,
+        return new UpdateInfo(version, tag, root.GetProperty("html_url").GetString() ?? ReleasesUrl, downloadUrl,
             root.TryGetProperty("body", out var body) ? body.GetString() ?? "" : "");
     }
 
