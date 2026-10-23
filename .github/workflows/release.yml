@@ -1,47 +1,136 @@
-# Builds the single-file editor and publishes it as a GitHub release when a version tag (e.g. v1.1.0) is pushed.
-# The release gets CP2077SaveEditor.exe plus GitHub's source archives.
+# Builds the single-file self-contained editor (.NET 10 x64) and publishes it as a GitHub release
+# when a version tag (e.g. v1.1.1) is pushed or triggered via workflow_dispatch.
+# The release gets CP2077SaveEditor.exe and a ZIP archive with the version number.
 name: Release
 
 on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      wolvenkit_branch:
+        description: 'WolvenKit branch to build with'
+        required: true
+        type: choice
+        options:
+          - 'update_2.5'
+          - 'main'
+          - 'pinned'
+        default: 'update_2.5'
+      version:
+        description: 'Version string for the release (e.g. 1.1.1)'
+        required: false
+        type: string
+        default: '1.1.1'
+      create_release:
+        description: 'Create a GitHub Release and upload assets'
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: write
 
 jobs:
   build:
+    name: Build & Package Release (.NET 10 x64)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
 
-      - uses: actions/setup-dotnet@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 10.0.x
 
-      - name: Apply the WolvenKit patch for patch 2.5
-        shell: pwsh
-        run: ./tools/setup.ps1
-
-      - name: Publish
+      - name: Determine Version
+        id: version
         shell: pwsh
         run: |
-          $version = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME.TrimStart('v') } else { '0.0.0' }
-          dotnet publish CP2077SaveEditor.Wpf/CP2077SaveEditor.Wpf.csproj -c Release -r win-x64 -o publish -p:Version=$version
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+              $ver = $env:GITHUB_REF_NAME.TrimStart('v')
+          } elseif ("${{ inputs.version }}") {
+              $ver = "${{ inputs.version }}"
+          } else {
+              $ver = "1.1.1"
+          }
+          Write-Host "Configured release version: $ver"
+          "RELEASE_VERSION=$ver" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Configure WolvenKit Branch
+        shell: pwsh
+        run: |
+          $branch = "${{ inputs.wolvenkit_branch }}"
+          if (-not $branch) {
+              $branch = if ($env:GITHUB_REF_TYPE -eq 'tag') { "pinned" } else { "update_2.5" }
+          }
+          Write-Host "Selected WolvenKit target: $branch"
+
+          if ($branch -eq "pinned") {
+              Write-Host "Applying WolvenKit patch for pinned commit..."
+              ./tools/setup.ps1
+          } else {
+              Write-Host "Checking out WolvenKit origin/$branch..."
+              git -C WolvenKit reset --hard
+              git -C WolvenKit clean -fd
+              git -C WolvenKit fetch origin $branch
+              git -C WolvenKit checkout $branch
+              git -C WolvenKit pull origin $branch
+          }
+
+      - name: Run Unit Tests
+        shell: pwsh
+        run: |
+          dotnet test CP2077SaveEditor.Tests/CP2077SaveEditor.Tests.csproj -c Release
+
+      - name: Publish Self-Contained Release
+        shell: pwsh
+        run: |
+          $ver = "$env:RELEASE_VERSION"
+          dotnet publish CP2077SaveEditor.Wpf/CP2077SaveEditor.Wpf.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            -p:Version=$ver `
+            -o publish
+
           Move-Item publish/CP2077SaveEditor.Wpf.exe publish/CP2077SaveEditor.exe
 
-      - name: Upload build
+      - name: Package Release ZIP
+        shell: pwsh
+        run: |
+          $ver = "$env:RELEASE_VERSION"
+          $zipPath = "publish/CP2077SaveEditor-v$ver-win-x64.zip"
+          $files = @(
+              "publish/CP2077SaveEditor.exe",
+              "README.md",
+              "LICENSE"
+          )
+          if (Test-Path "licenses") {
+              $files += (Get-ChildItem "licenses" -Recurse -File).FullName
+          }
+          Compress-Archive -Path $files -DestinationPath $zipPath -CompressionLevel Optimal
+          Write-Host "Created release archive at $zipPath"
+
+      - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: CP2077SaveEditor
-          path: publish/CP2077SaveEditor.exe
+          name: CP2077SaveEditor-v${{ env.RELEASE_VERSION }}
+          path: |
+            publish/CP2077SaveEditor.exe
+            publish/*.zip
 
-      - name: Create release
-        if: github.ref_type == 'tag'
+      - name: Create GitHub Release
+        if: ${{ github.ref_type == 'tag' || inputs.create_release == true }}
         uses: softprops/action-gh-release@v2
         with:
-          files: publish/CP2077SaveEditor.exe
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('v{0}', env.RELEASE_VERSION) }}
+          name: ${{ github.ref_type == 'tag' && github.ref_name || format('CP2077 Save Editor v{0}', env.RELEASE_VERSION) }}
+          files: |
+            publish/CP2077SaveEditor.exe
+            publish/*.zip
           generate_release_notes: true

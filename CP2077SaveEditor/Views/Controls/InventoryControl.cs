@@ -1,4 +1,4 @@
-﻿using CP2077SaveEditor.Extensions;
+using CP2077SaveEditor.Extensions;
 using CP2077SaveEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -261,27 +261,18 @@ namespace CP2077SaveEditor.Views.Controls
                     row[1] += "Unknown";
                 }
 
-                if (search != "")
+                if (!string.IsNullOrWhiteSpace(search))
                 {
                     if (searchField > -1)
                     {
-                        if (!row[searchField].ToLower().Contains(search.ToLower()))
+                        if (!FuzzySearch.Matches(row[searchField], search))
                         {
                             continue;
                         }
                     }
                     else
                     {
-                        var containsSearchString = false;
-                        foreach (string rowItem in row)
-                        {
-                            if (!string.IsNullOrEmpty(rowItem) && rowItem.ToLower().Contains(search.ToLower()))
-                            {
-                                containsSearchString = true;
-                                break;
-                            }
-                        }
-                        if (!containsSearchString)
+                        if (!FuzzySearch.MatchesAny(search, row))
                         {
                             continue;
                         }

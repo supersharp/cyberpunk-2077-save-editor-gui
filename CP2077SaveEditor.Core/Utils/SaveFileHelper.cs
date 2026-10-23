@@ -1,8 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using CP2077SaveEditor.Utils;
+using CP2077SaveEditor.Editing;
+using OptimizedStatsStore = CP2077SaveEditor.Editing.OptimizedStatsStore;
 using WolvenKit.RED4.Save;
 using static WolvenKit.RED4.Types.Enums;
 using WolvenKit.RED4.Types;

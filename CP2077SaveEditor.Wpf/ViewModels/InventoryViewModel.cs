@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CP2077SaveEditor.Editing;
+using CP2077SaveEditor.Utils;
 using CP2077SaveEditor.Wpf.Services;
 using WolvenKit.RED4.Save;
 using WolvenKit.RED4.Save.Classes;
@@ -227,8 +228,7 @@ public sealed partial class InventoryViewModel : PageViewModel
             return false;
         }
         return string.IsNullOrWhiteSpace(Search)
-               || row.Name.Contains(Search.Trim(), StringComparison.OrdinalIgnoreCase)
-               || row.Record.Contains(Search.Trim(), StringComparison.OrdinalIgnoreCase);
+               || FuzzySearch.MatchesAny(Search, row.Name, row.Record, row.EquippedIn, row.TierText);
     }
 
     private void RefreshView()

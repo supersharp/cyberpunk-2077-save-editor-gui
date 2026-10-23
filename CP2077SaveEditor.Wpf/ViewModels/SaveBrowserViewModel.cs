@@ -9,6 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CP2077SaveEditor.Utils;
 using CP2077SaveEditor.Wpf.Services;
 
 namespace CP2077SaveEditor.Wpf.ViewModels;
@@ -108,11 +109,7 @@ public sealed partial class SaveBrowserViewModel : PageViewModel
         {
             return true;
         }
-        var f = Filter.Trim();
-        return s.Slot.FolderName.Contains(f, StringComparison.OrdinalIgnoreCase)
-               || s.Quest.Contains(f, StringComparison.OrdinalIgnoreCase)
-               || s.Title.Contains(f, StringComparison.OrdinalIgnoreCase)
-               || s.Slot.LifePath.Contains(f, StringComparison.OrdinalIgnoreCase);
+        return FuzzySearch.MatchesAny(Filter, s.Slot.FolderName, s.Quest, s.Title, s.Slot.LifePath, s.Character, s.Patch);
     }
 
     /// <summary>Source chips: All, Game saves, My library and each added folder.</summary>

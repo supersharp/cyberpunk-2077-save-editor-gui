@@ -81,7 +81,7 @@ Patch 2.5 changed how the game stores stats and some world data. The fixes (in
 
 ## Building from source
 
-Requires the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) and Git on Windows.
+Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (x64) and Git on Windows.
 
 ```powershell
 git clone --recurse-submodules https://github.com/AtfastrSlushyMaker/cyberpunk-2077-save-editor-gui.git
@@ -92,7 +92,7 @@ dotnet publish CP2077SaveEditor.Wpf -c Release -r win-x64 -o publish/wpf   # sin
 ```
 
 Releases are built by GitHub Actions ([`.github/workflows/release.yml`](.github/workflows/release.yml)): pushing a
-tag such as `v1.1.0` builds the exe and publishes it as a release.
+tag such as `v1.1.1` builds the single-file exe and zip package and publishes it as a release.
 
 Projects:
 

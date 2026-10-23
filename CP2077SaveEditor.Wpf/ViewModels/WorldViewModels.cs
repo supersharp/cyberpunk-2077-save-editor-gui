@@ -115,7 +115,7 @@ public sealed partial class AppearanceViewModel : ListPageViewModel<AppearanceEn
     [ObservableProperty] private bool _isVoiceMale;
     [ObservableProperty] private AppearanceEntryRow? _selectedEntry;
 
-    protected override bool Matches(AppearanceEntryRow row, string search) => row.Key.Contains(search, StringComparison.OrdinalIgnoreCase);
+    protected override bool Matches(AppearanceEntryRow row, string search) => FuzzySearch.MatchesAny(search, row.Key, row.Name, row.Definition, row.ResourcePath);
 
     protected override void Load(EditorSession session)
     {
@@ -293,8 +293,7 @@ public sealed partial class VehiclesViewModel : ListPageViewModel<VehicleRow>
     };
 
     protected override bool Matches(VehicleRow row, string search) =>
-        row.DisplayName.Contains(search, StringComparison.OrdinalIgnoreCase) || row.Record.Contains(search, StringComparison.OrdinalIgnoreCase)
-        || row.Manufacturer.Contains(search, StringComparison.OrdinalIgnoreCase);
+        FuzzySearch.MatchesAny(search, row.DisplayName, row.Record, row.Manufacturer, row.Kind);
 
     protected override void Load(EditorSession session)
     {
@@ -454,10 +453,15 @@ public sealed partial class QuestFactsViewModel : ListPageViewModel<FactRow>
         Suggestions.Clear();
         var text = value.Trim();
         if (text.Length < 2 || WorldEditor.KnownFactNames.Any(n => n == text)) return;
-        foreach (var name in WorldEditor.KnownFactNames.Where(n => n.Contains(text, StringComparison.OrdinalIgnoreCase))
-                     .OrderBy(n => !n.StartsWith(text, StringComparison.OrdinalIgnoreCase)).ThenBy(n => n.Length).Take(8))
+        var ranked = WorldEditor.KnownFactNames
+            .Select(n => (Name: n.Trim(), Score: FuzzySearch.Score(n, text)))
+            .Where(x => x.Score > 0)
+            .OrderByDescending(x => x.Score)
+            .ThenBy(x => x.Name.Length)
+            .Take(8);
+        foreach (var item in ranked)
         {
-            Suggestions.Add(name.Trim());
+            Suggestions.Add(item.Name);
         }
     }
 
@@ -476,7 +480,7 @@ public sealed partial class QuestFactsViewModel : ListPageViewModel<FactRow>
         var category => row.Category == category
     };
 
-    protected override bool Matches(FactRow row, string search) => row.Name.Contains(search, StringComparison.OrdinalIgnoreCase);
+    protected override bool Matches(FactRow row, string search) => FuzzySearch.MatchesAny(search, row.Name, row.Category);
 
     [RelayCommand]
     private void UndoEdits()

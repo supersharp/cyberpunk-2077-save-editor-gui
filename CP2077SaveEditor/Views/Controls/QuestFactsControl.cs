@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -94,9 +94,10 @@ namespace CP2077SaveEditor.Views.Controls
 
             foreach (FactsTable.FactEntry fact in factsList)
             {
-                if (search != "")
+                if (!string.IsNullOrWhiteSpace(search))
                 {
-                    if (!_parentForm.ActiveSaveFile.KnownFacts[fact.FactName].ToLower().Contains(search.ToLower()))
+                    var factName = _parentForm.ActiveSaveFile.KnownFacts[fact.FactName];
+                    if (!FuzzySearch.Matches(factName, search))
                     {
                         continue;
                     }

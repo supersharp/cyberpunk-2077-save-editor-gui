@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CP2077SaveEditor.Editing;
 using CP2077SaveEditor.GameAssets;
+using CP2077SaveEditor.Utils;
 using CP2077SaveEditor.Wpf.Services;
 
 namespace CP2077SaveEditor.Wpf.ViewModels;
@@ -169,8 +170,13 @@ public sealed partial class AddItemViewModel : ObservableObject
         {
             return true;
         }
-        var terms = Search.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return terms.All(t => row.Name.Contains(t, StringComparison.OrdinalIgnoreCase) || row.Variants.Any(v => v.Item.Record.Contains(t, StringComparison.OrdinalIgnoreCase)));
+        var fields = new string[row.Variants.Count + 1];
+        fields[0] = row.Name;
+        for (var i = 0; i < row.Variants.Count; i++)
+        {
+            fields[i + 1] = row.Variants[i].Item.Record;
+        }
+        return FuzzySearch.MatchesAny(Search, fields);
     }
 
     public IReadOnlyList<AddItemChoice> Result

@@ -21,25 +21,35 @@
                         <Run Text="{Binding Version, Mode=OneWay}" /><Run Text="  ·  A save editor for Cyberpunk 2077, patch 2.5" />
                     </TextBlock>
                 </StackPanel>
-                <Button Content="VIEW ON GITHUB" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                        Command="{Binding OpenLinkCommand}" CommandParameter="{Binding RepositoryUrl}" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="VIEW FORK ON GITHUB" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"
+                            Command="{Binding OpenLinkCommand}" CommandParameter="{Binding ForkedRepositoryUrl}"
+                            ToolTip="Open the forked repository (supersharp) on GitHub" />
+                    <Button Content="VIEW UPSTREAM"
+                            Command="{Binding OpenLinkCommand}" CommandParameter="{Binding UpstreamRepositoryUrl}"
+                            ToolTip="Open the upstream repository (AtfastrSlushyMaker) on GitHub" />
+                </StackPanel>
             </Grid>
 
-            <!-- Downloads -->
+            <!-- Updates / Downloads -->
             <ContentControl Style="{StaticResource Card}" Margin="0,0,0,24">
                 <DockPanel>
-                    <Button DockPanel.Dock="Right" Content="DOWNLOAD LATEST VERSION" Style="{StaticResource PrimaryButton}"
-                            Command="{Binding OpenReleasesCommand}" VerticalAlignment="Center" Margin="16,0,0,0"
-                            ToolTip="Open the latest release in your browser" />
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Content="CHECK FOR UPDATES" Command="{Binding CheckForUpdatesCommand}" Margin="0,0,8,0"
+                                ToolTip="Check supersharp/cyberpunk-2077-save-editor-gui for new builds" />
+                        <Button Content="DOWNLOAD LATEST" Style="{StaticResource PrimaryButton}"
+                                Command="{Binding OpenReleasesCommand}"
+                                ToolTip="Open the latest release on the forked repository in your browser" />
+                    </StackPanel>
                     <StackPanel>
-                        <TextBlock Text="DOWNLOADS" Style="{StaticResource Label}" Foreground="{StaticResource AccentBrush}" FontSize="12" Margin="0,0,0,6" />
-                        <TextBlock Text="Get the latest version from the releases page in your browser." FontSize="13" TextWrapping="Wrap" />
+                        <TextBlock Text="UPDATES &amp; BUILDS" Style="{StaticResource Label}" Foreground="{StaticResource AccentBrush}" FontSize="12" Margin="0,0,0,6" />
+                        <TextBlock Text="{Binding UpdateStatus}" FontSize="13" TextWrapping="Wrap" />
                     </StackPanel>
                 </DockPanel>
             </ContentControl>
 
             <!-- Credits -->
-            <TextBlock Text="BUILT ON" Style="{StaticResource Label}" Foreground="{StaticResource AccentBrush}" FontSize="12" Margin="0,0,0,10" />
+            <TextBlock Text="BUILT ON &amp; FORKED FROM" Style="{StaticResource Label}" Foreground="{StaticResource AccentBrush}" FontSize="12" Margin="0,0,0,10" />
             <ItemsControl ItemsSource="{Binding Credits}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
