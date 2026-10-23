@@ -69,8 +69,8 @@ the editor starts instantly. The data is rebuilt automatically after a game upda
 
 ## What changed for patch 2.5
 
-Patch 2.5 changed how the game stores stats and some world data. The fixes (in
-[`patches/wolvenkit-patch-2.5.patch`](patches/wolvenkit-patch-2.5.patch), applied on top of WolvenKit) are:
+Patch 2.5 changed how the game stores stats and some world data. The updates
+(natively supported via WolvenKit's `update_2.5` branch) are:
 
 - New stats format: `gameSavedStatsDataOptimized`, `gameBufferSlice` and the shared stat modifier buffer in
   `gameStatsStateMapStructure`, with read, edit and write support (`OptimizedStatsStore`).
@@ -86,7 +86,7 @@ Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (x
 ```powershell
 git clone --recurse-submodules https://github.com/AtfastrSlushyMaker/cyberpunk-2077-save-editor-gui.git
 cd cyberpunk-2077-save-editor-gui
-./tools/setup.ps1                       # fetches WolvenKit and applies the 2.5 patch
+./tools/setup.ps1                       # initializes the WolvenKit submodule
 dotnet build CP2077SaveEditor.Wpf -c Release
 dotnet publish CP2077SaveEditor.Wpf -c Release -r win-x64 -o publish/wpf   # single-file release
 ```
@@ -101,7 +101,7 @@ Projects:
 | `CP2077SaveEditor.Wpf` | The new editor (WPF, MVVM) |
 | `CP2077SaveEditor.Core` | Save reading/writing, editing logic and game data, shared by both apps |
 | `CP2077SaveEditor` | The original WinForms editor, kept working on top of the same core |
-| `WolvenKit` | Submodule (pinned commit) that does the actual save parsing |
+| `WolvenKit` | Submodule (`update_2.5` branch) that does the actual save parsing |
 
 Build the projects one at a time; the upstream `ResourceGenerator` project in the solution does not build.
 
