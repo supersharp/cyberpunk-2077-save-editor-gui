@@ -25,11 +25,12 @@ public sealed record AddItemChoice(CatalogItem Item, long Quantity, ItemTier? Ti
 public sealed partial class AddItemViewModel : ObservableObject
 {
     private static readonly SubFilter s_allSubs = new(null, "All");
+    private readonly HashSet<AddItemRow> _checkedRows = new();
 
     public AddItemViewModel(bool female, bool saveHasExpansion)
     {
         SaveHasExpansion = saveHasExpansion;
-        Rows = BuildRows(female);
+        Rows = BuildRows(female, OnRowCheckedChanged);
         foreach (var row in Rows)
         {
             row.IsLocked = row.IsExpansion && !saveHasExpansion && !AppSettings.Current.AllowExpansionItems;
@@ -77,13 +78,23 @@ public sealed partial class AddItemViewModel : ObservableObject
     [ObservableProperty]
     private string _summary = "";
 
+    public int CheckedCount => _checkedRows.Count;
+    public bool HasCheckedItems => _checkedRows.Count > 0;
+    public string AddButtonText => HasCheckedItems ? $"ADD ({CheckedCount})" : "ADD";
+    public string SelectionSummary => HasCheckedItems ? $"{CheckedCount} selected" : "";
+
     public bool HasSelection => SelectedItem != null;
-    public bool IsStackable => SelectedItem != null && InventoryEditor.IsStackable(SelectedItem.Variants[0].Item.Id);
+    public bool IsStackable => (SelectedItem != null && InventoryEditor.IsStackable(SelectedItem.Variants[0].Item.Id))
+                               || (HasCheckedItems && _checkedRows.Any(r => InventoryEditor.IsStackable(r.Variants[0].Item.Id)));
 
     /// <summary>Tier 5++ only applies to items whose grade is rolled when created (graded variants carry their own).</summary>
-    public bool CanHaveTier => SelectedItem is { HasGrades: false } row && InventoryEditor.HasTiers(row.Type) && row.Variants[0].Rank < 0;
+    public bool CanHaveTier => (SelectedItem is { HasGrades: false } row && InventoryEditor.HasTiers(row.Type) && row.Variants[0].Rank < 0)
+                               || (HasCheckedItems && _checkedRows.Any(r => !r.HasGrades && InventoryEditor.HasTiers(r.Type) && r.Variants[0].Rank < 0));
 
-    public bool CanAdd => SelectedItem is { IsLocked: false } row && (!row.HasGrades || row.Variants.Any(v => v.IsChecked));
+    public bool CanAdd =>
+        HasCheckedItems
+            ? _checkedRows.Any(r => !r.IsLocked && (!r.HasGrades || r.Variants.Any(v => v.IsChecked)))
+            : SelectedItem is { IsLocked: false } row && (!row.HasGrades || row.Variants.Any(v => v.IsChecked));
 
     partial void OnSearchChanged(string value) => Refresh();
     partial void OnShowUnnamedChanged(bool value) => Refresh();
@@ -103,14 +114,67 @@ public sealed partial class AddItemViewModel : ObservableObject
         }
         if (newValue is { HasGrades: true })
         {
-            // default to the best grade; the chips let the user pick others or all
-            foreach (var v in newValue.Variants) v.IsChecked = false;
-            newValue.Variants[^1].IsChecked = true;
+            // default to the best grade if none selected; the chips let the user pick others or all
+            if (!newValue.Variants.Any(v => v.IsChecked))
+            {
+                newValue.Variants[^1].IsChecked = true;
+            }
             foreach (var v in newValue.Variants) v.PropertyChanged += OnVariantChanged;
         }
     }
 
+    private void OnRowCheckedChanged(AddItemRow row)
+    {
+        if (row.IsChecked && !row.IsLocked)
+        {
+            _checkedRows.Add(row);
+        }
+        else
+        {
+            _checkedRows.Remove(row);
+        }
+
+        OnPropertyChanged(nameof(CheckedCount));
+        OnPropertyChanged(nameof(HasCheckedItems));
+        OnPropertyChanged(nameof(CanAdd));
+        OnPropertyChanged(nameof(AddButtonText));
+        OnPropertyChanged(nameof(SelectionSummary));
+        OnPropertyChanged(nameof(IsStackable));
+        OnPropertyChanged(nameof(CanHaveTier));
+        UpdateSummary();
+    }
+
     private void OnVariantChanged(object? sender, PropertyChangedEventArgs e) => OnPropertyChanged(nameof(CanAdd));
+
+    [RelayCommand]
+    private void SelectAllVisible()
+    {
+        foreach (var row in Rows)
+        {
+            if (Matches(row) && !row.IsLocked)
+            {
+                row.IsChecked = true;
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void ClearChecked()
+    {
+        foreach (var row in _checkedRows.ToList())
+        {
+            row.IsChecked = false;
+        }
+        _checkedRows.Clear();
+        OnPropertyChanged(nameof(CheckedCount));
+        OnPropertyChanged(nameof(HasCheckedItems));
+        OnPropertyChanged(nameof(CanAdd));
+        OnPropertyChanged(nameof(AddButtonText));
+        OnPropertyChanged(nameof(SelectionSummary));
+        OnPropertyChanged(nameof(IsStackable));
+        OnPropertyChanged(nameof(CanHaveTier));
+        UpdateSummary();
+    }
 
     [RelayCommand]
     private void SelectAllGrades()
@@ -140,7 +204,9 @@ public sealed partial class AddItemViewModel : ObservableObject
     private void UpdateSummary()
     {
         var shown = Rows.Count(Matches);
-        Summary = $"{shown:N0} items";
+        Summary = HasCheckedItems
+            ? $"{CheckedCount} selected  ·  {shown:N0} items"
+            : $"{shown:N0} items";
     }
 
     private bool InMainFilter(AddItemRow row) =>
@@ -183,14 +249,41 @@ public sealed partial class AddItemViewModel : ObservableObject
     {
         get
         {
-            if (SelectedItem is not { } row || !CanAdd)
+            if (!CanAdd)
             {
                 return Array.Empty<AddItemChoice>();
             }
-            var quantity = IsStackable ? Quantity : 1;
-            var tier = CanHaveTier && SetMaxTier ? ItemTier.Max : (ItemTier?)null;
-            var variants = row.HasGrades ? row.Variants.Where(v => v.IsChecked) : row.Variants;
-            return variants.Select(v => new AddItemChoice(v.Item, quantity, tier)).ToList();
+
+            var rowsToAdd = HasCheckedItems
+                ? _checkedRows.Where(r => !r.IsLocked).ToList()
+                : (SelectedItem is { IsLocked: false } single ? new List<AddItemRow> { single } : new List<AddItemRow>());
+
+            if (rowsToAdd.Count == 0)
+            {
+                return Array.Empty<AddItemChoice>();
+            }
+
+            var results = new List<AddItemChoice>();
+            foreach (var row in rowsToAdd)
+            {
+                var isStackable = InventoryEditor.IsStackable(row.Variants[0].Item.Id);
+                var quantity = isStackable ? Quantity : 1;
+                var canHaveTier = !row.HasGrades && InventoryEditor.HasTiers(row.Type) && row.Variants[0].Rank < 0;
+                var tier = canHaveTier && SetMaxTier ? ItemTier.Max : (ItemTier?)null;
+
+                var variants = row.HasGrades ? row.Variants.Where(v => v.IsChecked).ToList() : row.Variants;
+                if (row.HasGrades && variants.Count == 0)
+                {
+                    variants = new List<AddItemVariant> { row.Variants[^1] };
+                }
+
+                foreach (var v in variants)
+                {
+                    results.Add(new AddItemChoice(v.Item, quantity, tier));
+                }
+            }
+
+            return results;
         }
     }
 
@@ -198,7 +291,7 @@ public sealed partial class AddItemViewModel : ObservableObject
     /// One row per item; records that are the same item in different grades (same name and kind, one record per
     /// grade, e.g. a cyberware implant from Tier 1 to Tier 5++) are grouped into a single row.
     /// </summary>
-    private static List<AddItemRow> BuildRows(bool female)
+    private static List<AddItemRow> BuildRows(bool female, Action<AddItemRow> onCheckedChanged)
     {
         var index = GameDataService.Instance.Index;
         var entries = ItemCatalog.Addable.Select(i => (Item: i, Asset: index?.Get(i.Id))).ToList();
@@ -208,7 +301,7 @@ public sealed partial class AddItemViewModel : ObservableObject
         {
             var sub = ItemCategories.SubKey(group.Key.Filter, group.First().Asset?.ItemType, group.First().Asset?.EquipArea);
             AddItemRow Row(IEnumerable<(CatalogItem Item, ItemAsset? Asset)> members) =>
-                new(members.Select(m => new AddItemVariant(m.Item, m.Asset)).ToList(), group.Key.Name, group.Key.Filter, sub, index != null, female);
+                new(members.Select(m => new AddItemVariant(m.Item, m.Asset)).ToList(), group.Key.Name, group.Key.Filter, sub, index != null, female, onCheckedChanged);
 
             // one record per grade; where several records share a grade, the current ("Advanced…", not "…Base") one
             // joins the group and the leftovers stay separate rows
@@ -261,25 +354,41 @@ public sealed partial class AddItemVariant : ObservableObject
 public sealed partial class AddItemRow : ObservableObject
 {
     private readonly bool _female;
+    private readonly Action<AddItemRow>? _onCheckedChanged;
     private BitmapSource? _icon;
     private bool _iconRequested;
 
-    public AddItemRow(IReadOnlyList<AddItemVariant> variants, string name, string filterType, string? subKey, bool haveIndex, bool female)
+    public AddItemRow(IReadOnlyList<AddItemVariant> variants, string name, string filterType, string? subKey, bool haveIndex, bool female, Action<AddItemRow>? onCheckedChanged = null)
     {
         Variants = variants;
         Name = name;
         FilterType = filterType;
         _female = female;
+        _onCheckedChanged = onCheckedChanged;
         SubName = ItemCategories.SubName(subKey);
         // with game data loaded, records the game has no name for are templates or unused items; NPC and base
         // records are templates too
         IsHidden = (haveIndex && variants.All(v => v.Asset?.Name == null)) || variants.All(v => IsTemplate(v.Item.Record));
         IsExpansion = variants.Any(v => v.Asset?.Expansion == true);
+
+        // Default to the highest grade if variants exist
+        if (variants.Count > 0)
+        {
+            variants[^1].IsChecked = true;
+        }
     }
 
     /// <summary>"Items.Base_Pulsar", "Items.NPC_Strong_Arms_Bennett", "Items.SandevistanBase": not meant for the player.</summary>
     public static bool IsTemplate(string record) =>
         record.StartsWith("Items.Base_") || record.StartsWith("Items.NPC_") || record.Contains("_NPC_") || record.EndsWith("Base");
+
+    [ObservableProperty]
+    private bool _isChecked;
+
+    partial void OnIsCheckedChanged(bool value)
+    {
+        _onCheckedChanged?.Invoke(this);
+    }
 
     public IReadOnlyList<AddItemVariant> Variants { get; }
     public string Name { get; }

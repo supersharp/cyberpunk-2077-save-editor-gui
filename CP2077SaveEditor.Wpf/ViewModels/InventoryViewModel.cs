@@ -331,17 +331,38 @@ public sealed partial class InventoryViewModel : PageViewModel
         try
         {
             ItemData? last = null;
+            var addedCount = 0;
+            var failedErrors = new List<string>();
+
             foreach (var choice in choices)
             {
-                last = InventoryEditor.Add(_session.Save, SelectedContainer.Container, choice.Item.Id, (uint)choice.Quantity);
-                if (choice.Tier is { } tier && InventoryEditor.HasTiers(choice.Item.Type))
+                try
                 {
-                    InventoryEditor.SetTier(_session.Save, last, tier);
+                    var item = InventoryEditor.Add(_session.Save, SelectedContainer.Container, choice.Item.Id, (uint)choice.Quantity);
+                    if (choice.Tier is { } tier && InventoryEditor.HasTiers(choice.Item.Type))
+                    {
+                        InventoryEditor.SetTier(_session.Save, item, tier);
+                    }
+                    last = item;
+                    addedCount++;
+                }
+                catch (Exception ex)
+                {
+                    failedErrors.Add($"{choice.Item.DisplayName}: {ex.Message}");
                 }
             }
-            Changed();
-            LoadItems();
-            SelectedItem = Items.FirstOrDefault(r => ReferenceEquals(r.Item, last));
+
+            if (addedCount > 0)
+            {
+                Changed();
+                LoadItems();
+                SelectedItem = Items.FirstOrDefault(r => ReferenceEquals(r.Item, last));
+            }
+
+            if (failedErrors.Count > 0)
+            {
+                UserPrompt.Notice($"Added {addedCount} item(s), but failed to add {failedErrors.Count}:\n" + string.Join("\n", failedErrors.Take(5)), "Add item");
+            }
         }
         catch (Exception e)
         {

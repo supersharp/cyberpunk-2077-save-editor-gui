@@ -34,7 +34,7 @@
                 <CheckBox Content="Show unnamed records (templates and unused items)" Style="{StaticResource Switch}" IsChecked="{Binding ShowUnnamed}" VerticalAlignment="Center" />
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="CANCEL" IsCancel="True" Margin="0,0,8,0" />
-                    <Button Content="ADD" Style="{StaticResource PrimaryButton}" IsDefault="True" IsEnabled="{Binding CanAdd}" Click="Add_Click" MinWidth="110" />
+                    <Button Content="{Binding AddButtonText}" Style="{StaticResource PrimaryButton}" IsDefault="True" IsEnabled="{Binding CanAdd}" Click="Add_Click" MinWidth="110" />
                 </StackPanel>
             </Grid>
 
@@ -76,42 +76,67 @@
                     <ColumnDefinition Width="320" />
                 </Grid.ColumnDefinitions>
 
-                <ListBox ItemsSource="{Binding CatalogView}" SelectedItem="{Binding SelectedItem}" Style="{StaticResource RowList}"
-                         ItemContainerStyle="{StaticResource CatalogRow}" MouseDoubleClick="List_MouseDoubleClick">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate DataType="{x:Type vm:AddItemRow}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="88" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="150" />
-                                </Grid.ColumnDefinitions>
-                                <Border Width="78" Height="44" Background="#14FFFFFF" HorizontalAlignment="Left">
-                                    <Grid>
-                                        <Image Source="{Binding Icon}" Stretch="Uniform" Margin="2" RenderOptions.BitmapScalingMode="HighQuality" />
-                                        <TextBlock Text="&#xE7B8;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16" Opacity="0.3"
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="The game has no icon for this item"
-                                                   Visibility="{Binding HasNoIcon, Converter={StaticResource BoolToVisibility}}" />
-                                    </Grid>
-                                </Border>
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Name}" FontSize="13" TextTrimming="CharacterEllipsis" />
-                                        <Border Background="{StaticResource CyanBrush}" Padding="5,0" Margin="8,1,0,0" VerticalAlignment="Center"
-                                                Visibility="{Binding IsExpansion, Converter={StaticResource BoolToVisibility}}" ToolTip="Phantom Liberty item">
-                                            <TextBlock Text="PL" FontSize="10" FontWeight="Bold" Foreground="{StaticResource BgBrush}" />
-                                        </Border>
+                <DockPanel Grid.Column="0">
+                    <!-- Batch selection bar -->
+                    <Grid DockPanel.Dock="Top" Margin="0,0,0,6">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="SELECT ALL IN VIEW" Command="{Binding SelectAllVisibleCommand}"
+                                    Style="{StaticResource GhostButton}" FontSize="11" Padding="6,2" Margin="0,0,8,0"
+                                    ToolTip="Select all items currently shown in the list" />
+                            <Button Content="CLEAR SELECTION" Command="{Binding ClearCheckedCommand}"
+                                    Style="{StaticResource GhostButton}" FontSize="11" Padding="6,2"
+                                    Visibility="{Binding HasCheckedItems, Converter={StaticResource BoolToVisibility}}"
+                                    ToolTip="Uncheck all selected items" />
+                        </StackPanel>
+                        <TextBlock Text="{Binding SelectionSummary}" Style="{StaticResource Dim}" FontSize="11"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"
+                                   Visibility="{Binding HasCheckedItems, Converter={StaticResource BoolToVisibility}}" />
+                    </Grid>
+
+                    <ListBox ItemsSource="{Binding CatalogView}" SelectedItem="{Binding SelectedItem}" Style="{StaticResource RowList}"
+                             ItemContainerStyle="{StaticResource CatalogRow}" MouseDoubleClick="List_MouseDoubleClick">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:AddItemRow}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="28" />
+                                        <ColumnDefinition Width="88" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="150" />
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox Grid.Column="0" IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                              Style="{StaticResource RowCheckBox}"
+                                              VerticalAlignment="Center" HorizontalAlignment="Left"
+                                              Focusable="False"
+                                              IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}"
+                                              ToolTip="Select to add" />
+                                    <Border Grid.Column="1" Width="78" Height="44" Background="#14FFFFFF" HorizontalAlignment="Left">
+                                        <Grid>
+                                            <Image Source="{Binding Icon}" Stretch="Uniform" Margin="2" RenderOptions.BitmapScalingMode="HighQuality" />
+                                            <TextBlock Text="&#xE7B8;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="16" Opacity="0.3"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="The game has no icon for this item"
+                                                       Visibility="{Binding HasNoIcon, Converter={StaticResource BoolToVisibility}}" />
+                                        </Grid>
+                                    </Border>
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Name}" FontSize="13" TextTrimming="CharacterEllipsis" />
+                                            <Border Background="{StaticResource CyanBrush}" Padding="5,0" Margin="8,1,0,0" VerticalAlignment="Center"
+                                                    Visibility="{Binding IsExpansion, Converter={StaticResource BoolToVisibility}}" ToolTip="Phantom Liberty item">
+                                                <TextBlock Text="PL" FontSize="10" FontWeight="Bold" Foreground="{StaticResource BgBrush}" />
+                                            </Border>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding Record}" FontSize="10" Opacity="0.6" FontFamily="{StaticResource MonoFont}" TextTrimming="CharacterEllipsis" />
                                     </StackPanel>
-                                    <TextBlock Text="{Binding Record}" FontSize="10" Opacity="0.6" FontFamily="{StaticResource MonoFont}" TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Kind}" Opacity="0.8" FontSize="12" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Text="{Binding Details}" Opacity="0.6" FontSize="11" />
-                                </StackPanel>
-                            </Grid>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                                    <StackPanel Grid.Column="3" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Kind}" Opacity="0.8" FontSize="12" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Details}" Opacity="0.6" FontSize="11" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
 
                 <!-- Details of the selected item -->
                 <Border Grid.Column="1" Margin="12,0,0,0" Background="{StaticResource PanelRaisedBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1">
