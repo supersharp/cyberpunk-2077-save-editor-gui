@@ -80,6 +80,29 @@
                         <Button Content="Clear wardrobe blacklist" Command="{Binding ClearWardrobeBlacklistCommand}" IsEnabled="{Binding HasExtraWardrobe}" HorizontalAlignment="Left" />
                     </StackPanel>
                 </ContentControl>
+                <ContentControl Style="{StaticResource Card}" Margin="8,0,0,16">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,10">
+                            <TextBlock Text="CYBERPUNK 2077 INSTALLATION" Style="{StaticResource Label}" Foreground="{StaticResource AccentBrush}" FontSize="12" VerticalAlignment="Center" />
+                            <Border Background="{StaticResource CyanBrush}" Padding="6,1" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    Visibility="{Binding IsCustomGameDir, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="CUSTOM" Foreground="{StaticResource BgBrush}" FontFamily="{StaticResource DisplayFont}" FontSize="10" FontWeight="SemiBold" />
+                            </Border>
+                        </DockPanel>
+                        <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap" Margin="0,0,0,10"
+                                   Text="Game folder used to read item names, descriptions, and icons from your game files." />
+                        <TextBox Text="{Binding InstallStatus, Mode=OneWay}" IsReadOnly="True" FontFamily="{StaticResource MonoFont}" FontSize="11"
+                                 Margin="0,0,0,12" Padding="6,4" ToolTip="Detected or configured game folder" />
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="SPECIFY LOCATION..." Style="{StaticResource PrimaryButton}"
+                                    Command="{Binding BrowseInstallDirCommand}" Margin="0,0,8,0"
+                                    ToolTip="Select the Cyberpunk 2077 installation folder on your PC" />
+                            <Button Content="RESET TO AUTO" Command="{Binding ResetInstallDirCommand}"
+                                    Visibility="{Binding IsCustomGameDir, Converter={StaticResource BoolToVisibility}}"
+                                    ToolTip="Reset to auto-detecting the game from Steam, GOG, or Epic" />
+                        </StackPanel>
+                    </StackPanel>
+                </ContentControl>
             </UniformGrid>
         </StackPanel>
     </ScrollViewer>

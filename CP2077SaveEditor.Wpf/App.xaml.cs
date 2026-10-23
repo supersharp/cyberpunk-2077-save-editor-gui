@@ -41,8 +41,7 @@ public partial class App : Application
         DispatcherUnhandledException += (_, args) =>
         {
             Log(args.Exception);
-            MessageBox.Show($"Something went wrong:\n\n{args.Exception.GetBaseException().Message}\n\nDetails were written to {LogPath}. " +
-                            "Your save files have not been modified.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Views.ThemedDialog.ShowNotice(MainWindow, $"Something went wrong:\n\n{args.Exception.GetBaseException().Message}\n\nDetails were written to {LogPath}.\n\nYour save files have not been modified.", "Error");
             args.Handled = true;
         };
         TaskScheduler.UnobservedTaskException += (_, args) => { Log(args.Exception); args.SetObserved(); };
@@ -93,11 +92,10 @@ public partial class App : Application
 internal sealed class DialogUserPrompt : IUserPrompt
 {
     public void Notice(string message, string title) =>
-        Current.Dispatcher.Invoke(() => MessageBox.Show(Current.MainWindow!, message, title));
+        Current.Dispatcher.Invoke(() => Views.ThemedDialog.ShowNotice(Current.MainWindow, message, title));
 
     public bool Confirm(string message, string title) =>
-        Current.Dispatcher.Invoke(() =>
-            MessageBox.Show(Current.MainWindow!, message, title, MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes);
+        Current.Dispatcher.Invoke(() => Views.ThemedDialog.ShowConfirm(Current.MainWindow, message, title));
 
     private static Application Current => Application.Current;
 }

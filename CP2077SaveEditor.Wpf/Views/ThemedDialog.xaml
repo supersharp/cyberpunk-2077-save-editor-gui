@@ -1,0 +1,47 @@
+<Window x:Class="CP2077SaveEditor.Wpf.Views.ThemedDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding Title}" MinWidth="420" MaxWidth="540" SizeToContent="Height" ResizeMode="NoResize" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner" WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        UseLayoutRounding="True" TextOptions.TextFormattingMode="Display" Foreground="{StaticResource TextBrush}">
+
+    <Border Background="{StaticResource PanelBrush}" BorderBrush="{Binding HeaderBrush}" BorderThickness="1" Margin="16">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="24" ShadowDepth="0" Opacity="0.6" Color="Black" />
+        </Border.Effect>
+        <StackPanel Margin="24,20,24,20">
+            <!-- Header bar with drag support -->
+            <Grid MouseLeftButtonDown="Header_MouseLeftButtonDown" Background="Transparent" Margin="0,0,0,16">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="26" Height="26" Background="{Binding HeaderBrush}" Margin="0,0,12,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Glyph}" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="14"
+                                   Foreground="{Binding GlyphBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="{Binding TitleUpper}" Style="{StaticResource H1}" FontSize="18" TextTrimming="CharacterEllipsis" Foreground="{Binding HeaderBrush}" />
+                </StackPanel>
+            </Grid>
+
+            <!-- Message body -->
+            <ScrollViewer MaxHeight="380" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,0,0,22">
+                <TextBlock Text="{Binding Message}" FontSize="13" TextWrapping="Wrap" LineHeight="20" Foreground="{StaticResource TextBrush}" />
+            </ScrollViewer>
+
+            <!-- Action buttons -->
+            <Grid>
+                <!-- Notice buttons (single OK) -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                            Visibility="{Binding IsConfirm, Converter={StaticResource InverseBoolToVisibility}}">
+                    <Button Content="OK" Style="{StaticResource PrimaryButton}" IsDefault="True" IsCancel="True"
+                            Click="Ok_Click" MinWidth="100" />
+                </StackPanel>
+
+                <!-- Confirm buttons (Cancel / Confirm) -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                            Visibility="{Binding IsConfirm, Converter={StaticResource BoolToVisibility}}">
+                    <Button Content="CANCEL" IsCancel="True" Click="Cancel_Click" MinWidth="90" Margin="0,0,10,0" />
+                    <Button Content="CONFIRM" Style="{StaticResource PrimaryButton}" IsDefault="True" Click="Confirm_Click" MinWidth="100" />
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </Border>
+</Window>

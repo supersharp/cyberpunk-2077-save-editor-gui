@@ -96,8 +96,23 @@
             <ContentControl Style="{StaticResource Card}" Margin="0,12,12,0">
                 <StackPanel>
                     <TextBlock Text="GAME DATA AND LICENSES" Style="{StaticResource Label}" Foreground="{StaticResource AccentBrush}" FontSize="12" Margin="0,0,0,8" />
-                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap" LineHeight="18"
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,12"
                                Text="Item names, icons and vehicle pictures are read from your own copy of the game; nothing from the game is shipped with the editor. They belong to CD PROJEKT RED. Cyberpunk 2077 is a trademark of CD PROJEKT S.A.; this project is not affiliated with or endorsed by CD PROJEKT RED. The editor's source code is MIT licensed; release builds include WolvenKit (GPL-3.0)." />
+                    <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button Content="SPECIFY LOCATION..." Command="{Binding BrowseInstallDirCommand}" Margin="0,0,8,0"
+                                        ToolTip="Select the Cyberpunk 2077 installation folder on your PC" />
+                                <Button Content="RESET TO AUTO" Command="{Binding ResetInstallDirCommand}"
+                                        Visibility="{Binding IsCustomGameDir, Converter={StaticResource BoolToVisibility}}"
+                                        ToolTip="Reset to auto-detecting the game from Steam, GOG, or Epic" />
+                            </StackPanel>
+                            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                                <TextBlock Text="GAME INSTALLATION DIRECTORY" Style="{StaticResource Label}" Margin="0,0,0,3" />
+                                <TextBlock Text="{Binding InstallStatus}" FontFamily="{StaticResource MonoFont}" FontSize="12" Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
                 </StackPanel>
             </ContentControl>
         </StackPanel>

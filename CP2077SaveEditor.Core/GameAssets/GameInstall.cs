@@ -18,10 +18,33 @@ public static class GameInstall
         !string.IsNullOrWhiteSpace(gameDir) && File.Exists(TweakDbPath(gameDir)) && Directory.Exists(ContentDir(gameDir));
 
     /// <summary>Returns the first valid install found, or null.</summary>
-    public static string? Find() => Candidates().FirstOrDefault(IsValid);
+    public static string? Find(string? customDir = null) => Candidates(customDir).FirstOrDefault(IsValid);
 
-    private static IEnumerable<string> Candidates()
+    /// <summary>
+    /// Resolves the Cyberpunk 2077 root directory if the user selected a subfolder (e.g. bin\x64).
+    /// </summary>
+    public static string ResolveGameRoot(string path)
     {
+        if (string.IsNullOrWhiteSpace(path)) return path;
+        var dir = path.TrimEnd('\\', '/');
+        if (IsValid(dir)) return dir;
+
+        var parent = Directory.GetParent(dir)?.FullName;
+        if (parent != null && IsValid(parent)) return parent;
+
+        var grandParent = Directory.GetParent(dir)?.Parent?.FullName;
+        if (grandParent != null && IsValid(grandParent)) return grandParent;
+
+        return dir;
+    }
+
+    private static IEnumerable<string> Candidates(string? customDir = null)
+    {
+        if (!string.IsNullOrWhiteSpace(customDir))
+        {
+            yield return ResolveGameRoot(customDir);
+        }
+
         // Steam: every library listed in libraryfolders.vdf
         foreach (var steam in new[] { SteamPath(), @"C:\Program Files (x86)\Steam", @"C:\Program Files\Steam" }.Where(p => p != null).Distinct())
         {

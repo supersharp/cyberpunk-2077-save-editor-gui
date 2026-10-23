@@ -13,6 +13,9 @@ public sealed class AppSettings
 
     public static AppSettings Current { get; } = Load();
 
+    /// <summary>Custom Cyberpunk 2077 install directory set by the user; null to auto-detect.</summary>
+    public string? CustomGameDir { get; set; }
+
     /// <summary>Let Phantom Liberty items be added to saves without the expansion (the game may crash).</summary>
     public bool AllowExpansionItems { get; set; }
 

@@ -41,10 +41,34 @@ public sealed partial class GameDataService : ObservableObject
 
     private string? IconDir => GameDir == null ? null : Path.Combine(GameAssetIndex.CacheDir(GameDir), "icons");
 
+    public bool IsCustomGameDir => !string.IsNullOrEmpty(AppSettings.Current.CustomGameDir);
+
+    public async Task<bool> SetCustomGameDirAsync(string? path)
+    {
+        var resolved = path != null ? GameInstall.ResolveGameRoot(path) : null;
+        if (resolved != null && !GameInstall.IsValid(resolved))
+        {
+            return false;
+        }
+
+        AppSettings.Current.CustomGameDir = resolved;
+        AppSettings.Current.Save();
+
+        _icons.Clear();
+        Index = null;
+        GameDir = null;
+        Status = "Game data: reloading...";
+        OnPropertyChanged(nameof(IsCustomGameDir));
+
+        await InitializeAsync();
+        return true;
+    }
+
     /// <summary>Finds the game, loads or builds the name index, then makes sure icons are extracted (all background).</summary>
     public async Task InitializeAsync()
     {
-        GameDir = await Task.Run(GameInstall.Find);
+        GameDir = await Task.Run(() => GameInstall.Find(AppSettings.Current.CustomGameDir));
+        OnPropertyChanged(nameof(IsCustomGameDir));
         if (GameDir == null)
         {
             Status = "Game data: Cyberpunk 2077 install not found (names and icons unavailable)";
