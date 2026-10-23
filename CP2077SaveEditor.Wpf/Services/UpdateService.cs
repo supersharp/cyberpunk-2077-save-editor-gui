@@ -11,16 +11,17 @@ namespace CP2077SaveEditor.Wpf.Services;
 public sealed record UpdateInfo(Version Version, string Tag, string PageUrl, string? DownloadUrl, string Notes);
 
 /// <summary>
-/// Checks the forked GitHub repository (supersharp/cyberpunk-2077-save-editor-gui) for new builds and releases.
+/// Checks GitHub releases for new builds and provides release download links.
 /// </summary>
 public static class UpdateService
 {
+    public const string Repository = "AtfastrSlushyMaker/cyberpunk-2077-save-editor-gui";
     public const string ForkedRepository = "supersharp/cyberpunk-2077-save-editor-gui";
-    public const string UpstreamRepository = "AtfastrSlushyMaker/cyberpunk-2077-save-editor-gui";
 
+    public static string RepositoryUrl => $"https://github.com/{Repository}";
+    public static string ReleasesUrl => $"{RepositoryUrl}/releases";
+    public static string LatestReleaseUrl => $"{ReleasesUrl}/latest";
     public static string ForkedRepositoryUrl => $"https://github.com/{ForkedRepository}";
-    public static string ForkedReleasesUrl => $"{ForkedRepositoryUrl}/releases";
-    public static string UpstreamRepositoryUrl => $"https://github.com/{UpstreamRepository}";
 
     public static Version CurrentVersion { get; } = typeof(UpdateService).Assembly.GetName().Version ?? new Version(1, 1, 1);
 
@@ -34,13 +35,13 @@ public static class UpdateService
         return http;
     }
 
-    /// <summary>The latest release on the forked repository if it is newer than this build, otherwise null.</summary>
+    /// <summary>The latest release on the repository if it is newer than this build, otherwise null.</summary>
     public static async Task<UpdateInfo?> CheckAsync()
     {
-        using var response = await s_http.GetAsync($"https://api.github.com/repos/{ForkedRepository}/releases/latest");
+        using var response = await s_http.GetAsync($"https://api.github.com/repos/{Repository}/releases/latest");
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
-            return null; // no release published on fork yet
+            return null;
         }
         response.EnsureSuccessStatusCode();
         using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
@@ -57,7 +58,7 @@ public static class UpdateService
                 .FirstOrDefault(a => a.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) || a.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)).Url
             : null;
 
-        return new UpdateInfo(version, tag, root.GetProperty("html_url").GetString() ?? ForkedReleasesUrl, downloadUrl,
+        return new UpdateInfo(version, tag, root.GetProperty("html_url").GetString() ?? LatestReleaseUrl, downloadUrl,
             root.TryGetProperty("body", out var body) ? body.GetString() ?? "" : "");
     }
 

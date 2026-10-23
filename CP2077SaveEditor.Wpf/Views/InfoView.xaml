@@ -22,12 +22,12 @@
                     </TextBlock>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button Content="VIEW FORK ON GITHUB" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"
+                    <Button Content="VIEW ON GITHUB" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"
+                            Command="{Binding OpenLinkCommand}" CommandParameter="{Binding RepositoryUrl}"
+                            ToolTip="Open the repository on GitHub" />
+                    <Button Content="FORK (SUPERSHARP)"
                             Command="{Binding OpenLinkCommand}" CommandParameter="{Binding ForkedRepositoryUrl}"
-                            ToolTip="Open the forked repository (supersharp) on GitHub" />
-                    <Button Content="VIEW UPSTREAM"
-                            Command="{Binding OpenLinkCommand}" CommandParameter="{Binding UpstreamRepositoryUrl}"
-                            ToolTip="Open the upstream repository (AtfastrSlushyMaker) on GitHub" />
+                            ToolTip="Open the supersharp fork on GitHub" />
                 </StackPanel>
             </Grid>
 
@@ -36,10 +36,10 @@
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
                         <Button Content="CHECK FOR UPDATES" Command="{Binding CheckForUpdatesCommand}" Margin="0,0,8,0"
-                                ToolTip="Check supersharp/cyberpunk-2077-save-editor-gui for new builds" />
+                                ToolTip="Check GitHub for new releases" />
                         <Button Content="DOWNLOAD LATEST" Style="{StaticResource PrimaryButton}"
                                 Command="{Binding OpenReleasesCommand}"
-                                ToolTip="Open the latest release on the forked repository in your browser" />
+                                ToolTip="Open the latest release on GitHub in your browser" />
                     </StackPanel>
                     <StackPanel>
                         <TextBlock Text="UPDATES &amp; BUILDS" Style="{StaticResource Label}" Foreground="{StaticResource AccentBrush}" FontSize="12" Margin="0,0,0,6" />

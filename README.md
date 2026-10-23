@@ -107,6 +107,12 @@ Build the projects one at a time; the upstream `ResourceGenerator` project in th
 
 ## Credits
 
+- **[CP2077 Save Editor Fork](https://github.com/supersharp/cyberpunk-2077-save-editor-gui) by supersharp**:
+  Intelligent fuzzy search across all views and editors, .NET 10 x64 modernization, multi-branch WolvenKit
+  release workflows, and clean WolvenKit update_2.5 integration.
+- **[CP2077 Save Editor](https://github.com/AtfastrSlushyMaker/cyberpunk-2077-save-editor-gui) by AtfastrSlushyMaker**:
+  The modern WPF rebuild with patch 2.5 save support, lossless writing, catalog indexing, vehicle pictures, and save library.
+
 - **[CyberCAT-SimpleGUI](https://github.com/Deweh/CyberCAT-SimpleGUI) by Deweh**: the original editor this
   project is based on. All the original features and research are theirs.
 - **[WolvenKit](https://github.com/WolvenKit/WolvenKit) by the WolvenKit team**: save, archive and game database

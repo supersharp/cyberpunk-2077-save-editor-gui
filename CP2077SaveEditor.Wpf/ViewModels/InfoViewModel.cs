@@ -20,16 +20,16 @@ public sealed partial class InfoViewModel : PageViewModel
     public override bool RequiresSave => false;
 
     public string Version => MainViewModel.Version;
+    public string RepositoryUrl => UpdateService.RepositoryUrl;
     public string ForkedRepositoryUrl => UpdateService.ForkedRepositoryUrl;
-    public string UpstreamRepositoryUrl => UpdateService.UpstreamRepositoryUrl;
-    public string ForkedReleasesUrl => UpdateService.ForkedReleasesUrl;
+    public string ReleasesUrl => UpdateService.ReleasesUrl;
 
     public IReadOnlyList<CreditEntry> Credits { get; } = new[]
     {
-        new CreditEntry("CP2077 Save Editor (Fork)", "supersharp", "This fork: fuzzy search across all views, .NET 10 x64 modernization, and multi-branch release workflows.",
+        new CreditEntry("CP2077 Save Editor (Fork)", "supersharp", "This fork: intelligent fuzzy search across all views, .NET 10 x64 modernization, and multi-branch release workflows.",
             UpdateService.ForkedRepositoryUrl, ""),
-        new CreditEntry("CP2077 Save Editor (Upstream)", "AtfastrSlushyMaker", "Original patch 2.5 save support, modern WPF UI, vehicle pictures, catalog index and save library.",
-            UpdateService.UpstreamRepositoryUrl, ""),
+        new CreditEntry("CP2077 Save Editor", "AtfastrSlushyMaker", "This editor: patch 2.5 save support, the new interface, lossless writing, catalog indexing and vehicle previews.",
+            UpdateService.RepositoryUrl, ""),
         new CreditEntry("CyberCAT-SimpleGUI", "Deweh", "The original save editor (Nexus mod 718) this project is based on. All original features and research are theirs.",
             "https://github.com/Deweh/CyberCAT-SimpleGUI", ""),
         new CreditEntry("WolvenKit", "The WolvenKit team", "Reads and writes the save, the game database and the game archives (names and icons).",
@@ -43,7 +43,7 @@ public sealed partial class InfoViewModel : PageViewModel
     private UpdateInfo? _update;
 
     [ObservableProperty]
-    private string _updateStatus = "Check for newer builds and releases on the forked repository.";
+    private string _updateStatus = "Check for newer builds and releases on GitHub.";
 
     [ObservableProperty]
     private bool _isBusy;
@@ -58,17 +58,17 @@ public sealed partial class InfoViewModel : PageViewModel
     {
         if (IsBusy) return;
         IsBusy = true;
-        UpdateStatus = "Checking supersharp/cyberpunk-2077-save-editor-gui for new builds…";
+        UpdateStatus = "Checking GitHub for new releases…";
         try
         {
             Update = await UpdateService.CheckAsync();
             if (Update != null)
             {
-                UpdateStatus = $"A new build ({Update.Tag}) is available on the forked repository!";
+                UpdateStatus = $"A new build ({Update.Tag}) is available on GitHub!";
             }
             else
             {
-                UpdateStatus = $"You are on the latest build ({Version}). No newer releases found on the forked repository.";
+                UpdateStatus = $"You are on the latest build ({Version}).";
             }
         }
         catch (Exception ex)
@@ -82,5 +82,5 @@ public sealed partial class InfoViewModel : PageViewModel
     }
 
     [RelayCommand]
-    private void OpenReleases() => UpdateService.OpenUrl(Update?.PageUrl ?? UpdateService.ForkedReleasesUrl);
+    private void OpenReleases() => UpdateService.OpenUrl(Update?.PageUrl ?? UpdateService.LatestReleaseUrl);
 }
