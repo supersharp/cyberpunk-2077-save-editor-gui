@@ -43,10 +43,8 @@ interface with real item names and icons.
 | Player | Inventory |
 | --- | --- |
 | ![Player](docs/screenshots/player.png) | ![Inventory](docs/screenshots/inventory.png) |
-| **Add item** | **Extras** |
-| ![Add item](docs/screenshots/add-item.png) | ![Extras](docs/screenshots/extras.png) |
-| **Add multiple items** |
-| ![Add multiple items](docs/screenshots/inventory_select.png) |
+| **Add multiple items** | **Extras** |
+| ![Add multiple items](docs/screenshots/inventory_select.png) | ![Extras](docs/screenshots/extras.png) |
 
 ## Download and use
 
