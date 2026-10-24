@@ -84,7 +84,7 @@ public sealed partial class GameDataService : ObservableObject
         if (!GameInstall.IsValid(resolved))
         {
             ThemedDialog.ShowNotice(owner,
-                $"The selected folder is not a valid Cyberpunk 2077 installation:\n\n{dialog.FolderName}\n\nA valid installation must contain 'r6\\cache\\tweakdb.bin' and 'archive\\pc\\content'.\n\nYou can set it manually at any time in the Extras menu.",
+                $"The selected folder is not a valid Cyberpunk 2077 installation:\n\n{dialog.FolderName}\n\nA valid installation must contain 'r6\\cache\\tweakdb.bin' and 'archive\\pc\\content'.\n\nYou can set it manually at any time on the Info page.",
                 "Invalid game directory");
             return false;
         }
@@ -103,7 +103,7 @@ public sealed partial class GameDataService : ObservableObject
         OnPropertyChanged(nameof(IsCustomGameDir));
         if (GameDir == null)
         {
-            Status = "Game data: Cyberpunk 2077 install not found (can be set manually in the Extras menu)";
+            Status = "Game data: Cyberpunk 2077 install not found (can be set manually on the Info page)";
             if (promptIfNotFound && Application.Current != null)
             {
                 await Application.Current.Dispatcher.InvokeAsync(async () =>
@@ -111,7 +111,7 @@ public sealed partial class GameDataService : ObservableObject
                     var owner = Application.Current.MainWindow;
                     var chooseLocation = ThemedDialog.ShowChoice(
                         owner,
-                        "Could not locate your Cyberpunk 2077 installation automatically.\n\nWithout the game files, item names and icons cannot be displayed.\n\nWould you like to browse and select your Cyberpunk 2077 installation folder now?\n\n(You can also set it manually at any time in the Extras menu.)",
+                        "Could not locate your Cyberpunk 2077 installation automatically.\n\nWithout the game files, item names and icons cannot be displayed.\n\nWould you like to browse and select your Cyberpunk 2077 installation folder now?\n\n(You can also set it manually at any time on the Info page.)",
                         "Cyberpunk 2077 Install Not Found",
                         "SET LOCATION",
                         "IGNORE");

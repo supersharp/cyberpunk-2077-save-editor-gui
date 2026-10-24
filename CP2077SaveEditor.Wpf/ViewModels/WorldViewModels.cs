@@ -567,40 +567,7 @@ public sealed partial class ExtrasViewModel : PageViewModel
 {
     private EditorSession? _session;
 
-    public ExtrasViewModel()
-    {
-        GameDataService.Instance.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName is nameof(GameDataService.GameDir) or nameof(GameDataService.IsCustomGameDir))
-            {
-                OnPropertyChanged(nameof(InstallStatus));
-                OnPropertyChanged(nameof(IsCustomGameDir));
-            }
-        };
-    }
-
     public override string Title => "Extras";
-    public string InstallStatus => GameDataService.Instance.GameDir ?? "Not found (can be set manually in the Extras menu)";
-    public bool IsCustomGameDir => GameDataService.Instance.IsCustomGameDir;
-
-    [RelayCommand]
-    private async Task BrowseInstallDir()
-    {
-        if (await GameDataService.Instance.PromptBrowseAndSetInstallDirAsync())
-        {
-            OnPropertyChanged(nameof(InstallStatus));
-            OnPropertyChanged(nameof(IsCustomGameDir));
-        }
-    }
-
-    [RelayCommand]
-    private async Task ResetInstallDir()
-    {
-        await GameDataService.Instance.SetCustomGameDirAsync(null);
-        OnPropertyChanged(nameof(InstallStatus));
-        OnPropertyChanged(nameof(IsCustomGameDir));
-        UserPrompt.Notice("Game install location reset to automatic detection.", "Install directory");
-    }
     public override string Glyph => "";
 
     [ObservableProperty] private bool _hasExtraWardrobe;

@@ -36,7 +36,7 @@ public sealed partial class InfoViewModel : PageViewModel
     public string UpstreamRepositoryUrl => UpdateService.UpstreamRepositoryUrl;
     public string ReleasesUrl => UpdateService.ReleasesUrl;
 
-    public string InstallStatus => GameDataService.Instance.GameDir ?? "Not found (can be set manually in the Extras menu)";
+    public string InstallStatus => GameDataService.Instance.GameDir ?? "Not found (specify location below)";
     public bool IsCustomGameDir => GameDataService.Instance.IsCustomGameDir;
 
     public IReadOnlyList<CreditEntry> Credits { get; } = new[]
