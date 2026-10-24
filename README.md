@@ -86,7 +86,7 @@ Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (x
 ```powershell
 git clone --recurse-submodules https://github.com/supersharp/cyberpunk-2077-save-editor-gui.git
 cd cyberpunk-2077-save-editor-gui
-./tools/setup.ps1                       # initializes the WolvenKit submodule
+./tools/setup.ps1                       # initialises the WolvenKit submodule
 dotnet build CP2077SaveEditor.Wpf -c Release
 dotnet publish CP2077SaveEditor.Wpf -c Release -r win-x64 -o publish/wpf   # single-file release
 ```
@@ -108,7 +108,7 @@ Build the projects one at a time; the upstream `ResourceGenerator` project in th
 ## Credits
 
 - **[CP2077 Save Editor](https://github.com/supersharp/cyberpunk-2077-save-editor-gui) by supersharp**:
-  Intelligent fuzzy search across all views and editors, .NET 10 x64 modernization, multi-branch WolvenKit
+  Intelligent fuzzy search across all views and editors, .NET 10 x64 modernisation, multi-branch WolvenKit
   release workflows, and clean WolvenKit update_2.5 integration.
 - **[CP2077 Save Editor (Upstream)](https://github.com/AtfastrSlushyMaker/cyberpunk-2077-save-editor-gui) by AtfastrSlushyMaker**:
   The modern WPF rebuild with patch 2.5 save support, lossless writing, catalog indexing, vehicle pictures, and save library.
@@ -123,6 +123,9 @@ Build the projects one at a time; the upstream `ResourceGenerator` project in th
   RED.
 
 Cyberpunk 2077 is a trademark of CD PROJEKT S.A. This project is not affiliated with or endorsed by CD PROJEKT RED.
+
+## Keywords
+cyberpunk 2077 save editor 2026 2.5
 
 ## License
 
