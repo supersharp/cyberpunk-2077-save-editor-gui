@@ -580,34 +580,17 @@ public sealed partial class ExtrasViewModel : PageViewModel
     }
 
     public override string Title => "Extras";
-    public string InstallStatus => GameDataService.Instance.GameDir ?? "Not found (names and icons unavailable)";
+    public string InstallStatus => GameDataService.Instance.GameDir ?? "Not found (can be set manually in the Extras menu)";
     public bool IsCustomGameDir => GameDataService.Instance.IsCustomGameDir;
 
     [RelayCommand]
     private async Task BrowseInstallDir()
     {
-        var dialog = new Microsoft.Win32.OpenFolderDialog
+        if (await GameDataService.Instance.PromptBrowseAndSetInstallDirAsync())
         {
-            Title = "Select Cyberpunk 2077 installation folder",
-            InitialDirectory = GameDataService.Instance.GameDir ?? @"C:\Program Files (x86)\Steam\steamapps\common"
-        };
-
-        if (dialog.ShowDialog() != true || string.IsNullOrWhiteSpace(dialog.FolderName))
-        {
-            return;
+            OnPropertyChanged(nameof(InstallStatus));
+            OnPropertyChanged(nameof(IsCustomGameDir));
         }
-
-        var resolved = GameInstall.ResolveGameRoot(dialog.FolderName);
-        if (!GameInstall.IsValid(resolved))
-        {
-            UserPrompt.Notice($"The selected folder is not a valid Cyberpunk 2077 installation:\n\n{dialog.FolderName}\n\nA valid installation must contain 'r6\\cache\\tweakdb.bin' and 'archive\\pc\\content'.", "Invalid game directory");
-            return;
-        }
-
-        await GameDataService.Instance.SetCustomGameDirAsync(resolved);
-        OnPropertyChanged(nameof(InstallStatus));
-        OnPropertyChanged(nameof(IsCustomGameDir));
-        UserPrompt.Notice($"Cyberpunk 2077 installation configured:\n\n{resolved}\n\nGame assets and icons are being loaded.", "Install directory configured");
     }
 
     [RelayCommand]

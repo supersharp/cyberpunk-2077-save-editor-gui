@@ -92,7 +92,7 @@ dotnet publish CP2077SaveEditor.Wpf -c Release -r win-x64 -o publish/wpf   # sin
 ```
 
 Releases are built by GitHub Actions ([`.github/workflows/release.yml`](.github/workflows/release.yml)): pushing a
-tag such as `v1.1.3` builds the single-file exe and zip package and publishes it as a release.
+tag such as `v1.1.5` builds the single-file exe and zip package and publishes it as a release.
 
 Projects:
 

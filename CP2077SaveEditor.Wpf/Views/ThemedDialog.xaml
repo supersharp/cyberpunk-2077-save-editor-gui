@@ -38,8 +38,8 @@
                 <!-- Confirm buttons (Cancel / Confirm) -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
                             Visibility="{Binding IsConfirm, Converter={StaticResource BoolToVisibility}}">
-                    <Button Content="CANCEL" IsCancel="True" Click="Cancel_Click" MinWidth="90" Margin="0,0,10,0" />
-                    <Button Content="CONFIRM" Style="{StaticResource PrimaryButton}" IsDefault="True" Click="Confirm_Click" MinWidth="100" />
+                    <Button Content="{Binding CancelText}" IsCancel="True" Click="Cancel_Click" MinWidth="90" Margin="0,0,10,0" />
+                    <Button Content="{Binding ConfirmText}" Style="{StaticResource PrimaryButton}" IsDefault="True" Click="Confirm_Click" MinWidth="120" />
                 </StackPanel>
             </Grid>
         </StackPanel>

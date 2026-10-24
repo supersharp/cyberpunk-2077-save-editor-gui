@@ -55,7 +55,7 @@ public partial class App : Application
         _ = viewModel.Browser.RefreshAsync();
 
         // Real item names and icons from the player's own game install (built once per game version).
-        _ = Services.GameDataService.Instance.InitializeAsync();
+        _ = Services.GameDataService.Instance.InitializeAsync(promptIfNotFound: true);
 
         // WolvenKit's one-time scan of the game's type database takes a few seconds; do it while the user
         // browses saves so opening one is quick.

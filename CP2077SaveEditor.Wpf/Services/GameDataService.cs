@@ -12,6 +12,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CP2077SaveEditor.Editing;
 using CP2077SaveEditor.GameAssets;
 using WolvenKit.RED4.Types;
+using CP2077SaveEditor.Wpf.Views;
 
 namespace CP2077SaveEditor.Wpf.Services;
 
@@ -60,18 +61,67 @@ public sealed partial class GameDataService : ObservableObject
         Status = "Game data: reloading...";
         OnPropertyChanged(nameof(IsCustomGameDir));
 
-        await InitializeAsync();
+        await InitializeAsync(promptIfNotFound: false);
+        return true;
+    }
+
+    /// <summary>Opens a folder dialog to browse for the Cyberpunk 2077 installation, validates it, and applies it.</summary>
+    public async Task<bool> PromptBrowseAndSetInstallDirAsync(System.Windows.Window? owner = null)
+    {
+        var dialog = new Microsoft.Win32.OpenFolderDialog
+        {
+            Title = "Select Cyberpunk 2077 installation folder",
+            InitialDirectory = GameDir ?? @"C:\Program Files (x86)\Steam\steamapps\common"
+        };
+
+        var result = (owner != null && owner.IsVisible) ? dialog.ShowDialog(owner) : dialog.ShowDialog();
+        if (result != true || string.IsNullOrWhiteSpace(dialog.FolderName))
+        {
+            return false;
+        }
+
+        var resolved = GameInstall.ResolveGameRoot(dialog.FolderName);
+        if (!GameInstall.IsValid(resolved))
+        {
+            ThemedDialog.ShowNotice(owner,
+                $"The selected folder is not a valid Cyberpunk 2077 installation:\n\n{dialog.FolderName}\n\nA valid installation must contain 'r6\\cache\\tweakdb.bin' and 'archive\\pc\\content'.\n\nYou can set it manually at any time in the Extras menu.",
+                "Invalid game directory");
+            return false;
+        }
+
+        await SetCustomGameDirAsync(resolved);
+        ThemedDialog.ShowNotice(owner,
+            $"Cyberpunk 2077 installation configured:\n\n{resolved}\n\nGame assets and icons are being loaded.",
+            "Install directory configured");
         return true;
     }
 
     /// <summary>Finds the game, loads or builds the name index, then makes sure icons are extracted (all background).</summary>
-    public async Task InitializeAsync()
+    public async Task InitializeAsync(bool promptIfNotFound = false)
     {
         GameDir = await Task.Run(() => GameInstall.Find(AppSettings.Current.CustomGameDir));
         OnPropertyChanged(nameof(IsCustomGameDir));
         if (GameDir == null)
         {
-            Status = "Game data: Cyberpunk 2077 install not found (names and icons unavailable)";
+            Status = "Game data: Cyberpunk 2077 install not found (can be set manually in the Extras menu)";
+            if (promptIfNotFound && Application.Current != null)
+            {
+                await Application.Current.Dispatcher.InvokeAsync(async () =>
+                {
+                    var owner = Application.Current.MainWindow;
+                    var chooseLocation = ThemedDialog.ShowChoice(
+                        owner,
+                        "Could not locate your Cyberpunk 2077 installation automatically.\n\nWithout the game files, item names and icons cannot be displayed.\n\nWould you like to browse and select your Cyberpunk 2077 installation folder now?\n\n(You can also set it manually at any time in the Extras menu.)",
+                        "Cyberpunk 2077 Install Not Found",
+                        "SET LOCATION",
+                        "IGNORE");
+
+                    if (chooseLocation)
+                    {
+                        await PromptBrowseAndSetInstallDirAsync(owner);
+                    }
+                });
+            }
             return;
         }
 

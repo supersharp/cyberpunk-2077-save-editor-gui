@@ -11,15 +11,19 @@ public partial class ThemedDialog : Window
     public string Message { get; }
     public string TitleUpper => (Title ?? "NOTICE").ToUpperInvariant();
     public bool IsConfirm { get; }
+    public string ConfirmText { get; }
+    public string CancelText { get; }
     public string Glyph { get; }
     public Brush HeaderBrush { get; }
     public Brush GlyphBrush { get; }
 
-    public ThemedDialog(string title, string message, bool isConfirm)
+    public ThemedDialog(string title, string message, bool isConfirm, string confirmText = "CONFIRM", string cancelText = "CANCEL")
     {
         Title = string.IsNullOrWhiteSpace(title) ? (isConfirm ? "Confirm" : "Notice") : title;
         Message = message;
         IsConfirm = isConfirm;
+        ConfirmText = string.IsNullOrWhiteSpace(confirmText) ? "CONFIRM" : confirmText;
+        CancelText = string.IsNullOrWhiteSpace(cancelText) ? "CANCEL" : cancelText;
 
         var lower = Title.ToLowerInvariant();
         if (lower.Contains("error") || lower.Contains("failed") || lower.Contains("invalid") || lower.Contains("unsupported"))
@@ -28,7 +32,7 @@ public partial class ThemedDialog : Window
             HeaderBrush = (Brush)Application.Current.FindResource("RedBrush");
             GlyphBrush = (Brush)Application.Current.FindResource("TextBrush");
         }
-        else if (isConfirm || lower.Contains("warning") || lower.Contains("discard") || lower.Contains("remove") || lower.Contains("lock"))
+        else if (isConfirm || lower.Contains("warning") || lower.Contains("discard") || lower.Contains("remove") || lower.Contains("lock") || lower.Contains("not found"))
         {
             Glyph = "\uE7BA"; // Warning triangle
             HeaderBrush = (Brush)Application.Current.FindResource("AccentBrush");
@@ -72,11 +76,16 @@ public partial class ThemedDialog : Window
         dlg.ShowDialog();
     }
 
-    public static bool ShowConfirm(Window? owner, string message, string title = "Confirm")
+    public static bool ShowConfirm(Window? owner, string message, string title = "Confirm", string confirmText = "CONFIRM", string cancelText = "CANCEL")
     {
-        var dlg = new ThemedDialog(title, message, isConfirm: true);
+        var dlg = new ThemedDialog(title, message, isConfirm: true, confirmText: confirmText, cancelText: cancelText);
         ConfigureOwner(dlg, owner);
         return dlg.ShowDialog() == true;
+    }
+
+    public static bool ShowChoice(Window? owner, string message, string title, string confirmText, string cancelText)
+    {
+        return ShowConfirm(owner, message, title, confirmText, cancelText);
     }
 
     private static void ConfigureOwner(Window dlg, Window? owner)

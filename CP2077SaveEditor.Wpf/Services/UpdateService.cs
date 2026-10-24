@@ -23,7 +23,7 @@ public static class UpdateService
     public static string LatestReleaseUrl => $"{ReleasesUrl}/latest";
     public static string UpstreamRepositoryUrl => $"https://github.com/{UpstreamRepository}";
 
-    public static Version CurrentVersion { get; } = typeof(UpdateService).Assembly.GetName().Version ?? new Version(1, 1, 4);
+    public static Version CurrentVersion { get; } = typeof(UpdateService).Assembly.GetName().Version ?? new Version(1, 1, 5);
 
     private static readonly HttpClient s_http = CreateClient();
 
